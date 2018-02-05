@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html ng-app="PostUI" >
+    <head>
+        <link rel="stylesheet" href="/app/services/uploadTest/file.css">
+        <link rel="stylesheet" href="/assets/css/stylesheets/audioPlayer.css">
+        <meta charset="UTF-8">
+        <script src="/app/services/uploadTest/jquery-2.1.3.js"></script>
+        <script src="/app/services/uploadTest/angular.js"></script>
+        <script src="/app/services/uploadTest/angular-resource.js"></script>
+        <script src="app/directives/AudioPlayer.js"></script>
+        <script src="/app/services/uploadTest/UploadRender.js"></script>
+        <script src="/app/services/uploadTest/newPostService.js"></script>
+        <script src="/app/directives/postUi.js"></script>
+    </head>
+    <body>
+        <oj-post dest-url="/api/me/posts"
+                 default-text="Share something useful..."
+                 width="400"
+        ></oj-post>
+    </body>
+</html>

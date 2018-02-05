@@ -1,0 +1,105 @@
+/**
+ * @author King David Lawrence
+ * @since 10/10/17
+ */
+
+angular.module('PostCard', ["ngResource"
+    , "Home"
+    , "PostUtils"
+    , "DateUtils"
+    , "ConstFactory"
+    ]).directive('ojPostCard', ["$resource"
+        , "dateUtils"
+        , "postUtils"
+        , "constants"
+        , "$timeout"
+        , function($resource, dateUtils, postUtils, constants, $timeout){
+            var link = function(scope, elem){
+                if(!scope.bodyJson)throw new Error("oj-post-card requires a value for the body-json field");
+                if(!scope.width)throw new Error("oj-post-card requires a value for the width field");
+
+                elem.width(scope.width);
+                var post = angular.fromJson(scope.bodyJson);
+                var username = elem.find(".username");
+                var date = elem.find(".date");
+                var MAX_HEIGHT = scope.width * 1.5;
+
+                elem.find(".card-header").width(scope.width);
+
+                if(post.author.profileMedia.media) {
+                    var mediaId = post.author.profileMedia.media;
+                    var mediaType = post.author.profileMedia.mediaType;
+                    var multiMedia = elem.find(".multimedia");
+                    var profileMedia = elem.find(".profile-media");
+                    var media = document.createElement(mediaType == "image"? "img" : "video");
+                    var loading = document.createElement("img");
+
+                    multiMedia.width(scope.width);
+                    loading.src = "/assets/img/loading.GIF";
+                    profileMedia.append(loading);
+
+                    media.src = constants.media + "/" + mediaId;
+                    media.onload = function(){
+                        var $media = angular.element(media);
+
+                        angular.element(loading).replaceWith(media);
+                        $media.height($media.width());
+                        elem.find(".card-header").height($media.height());
+
+                        username.css({
+                            top: -($media.height()/3) + "px"
+                        });
+
+                        date.css({
+                            top: ($media.height()/2) + "px"
+                        });
+                    }
+                }
+
+                username.html("<p>" + post.author.username + "</p>");
+                date.text(dateUtils.parseDate(post.date));
+
+                if(post.files.length){
+                    post.files.forEach(function(file){
+                        postUtils.loadMedia(scope, multiMedia, file);
+                    });
+                }
+
+                if(multiMedia.height() > MAX_HEIGHT){
+                    multiMedia.css({
+                        maxHeight: MAX_HEIGHT
+                        , overflowY: "scroll"
+                        , overflowX: "hidden"
+                    });
+                }
+
+                elem.find(".text").html("<p>" + postUtils.addTags(post.body) + "</p>");
+
+                var tagsDiv = elem.find(".tag-train");
+                tagsDiv.html(postUtils.parseTags(post.tags));
+                tagsDiv.on("mouseover", function(){
+                    postUtils.moveTags(tagsDiv);
+                });
+
+                //elem.append("<oj-post dest-url='/api/me/posts' width=" + scope.width + "></oj-post>");
+                //$compile(elem.contents())(scope);
+
+                $timeout(function(){
+                    elem.attr("body-json", "avenger");
+                    elem.attr("ng-repeat", "avenger in home.marvel");
+                });
+
+            };
+
+            return{
+                scope: {
+                    bodyJson: '@'
+                    , width: '='
+                }
+                , templateUrl: '/app/views/templates/card.html'
+                , restrict: 'E'
+                , replace: true
+                , link: link
+            }
+        }
+    ]);
